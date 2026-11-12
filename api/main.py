@@ -130,6 +130,10 @@ def get_items(
     response_model=Item
 )
 @limiter.limit("5/minute")
-def create_item(request: Request, item: Item):
+def create_item(
+    request: Request,
+    response: Response,
+    item: Item
+):
     return item
 app.include_router(protected_router)
