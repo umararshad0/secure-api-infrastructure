@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
@@ -42,6 +43,7 @@ class ItemsResponse(BaseModel):
 protected_router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
+
 app = FastAPI(
     title="Secure API Infrastructure",
     description="A secure REST API built with FastAPI",
@@ -62,6 +64,27 @@ async def global_exception_handler(request: Request, exc: Exception):
             "detail": "Internal server error"
         }
     )
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.perf_counter()
+
+    response = await call_next(request)
+
+    duration = (time.perf_counter() - start_time) * 1000
+
+    log_level = logging.WARNING if duration > 1000 else logging.INFO
+
+    logger.log(
+        log_level,
+        "%s %s - Status: %s - Duration: %.2f ms",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration
+    )
+
+    return response
+
 app.add_exception_handler(
     Exception,
     global_exception_handler
@@ -71,7 +94,6 @@ app.add_exception_handler(
     RateLimitExceeded,
     _rate_limit_exceeded_handler
 )
-
 
 @app.get("/")
 def home():
