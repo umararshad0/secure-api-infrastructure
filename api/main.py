@@ -1,11 +1,19 @@
 import os
 
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, APIRouter, Query, Depends, HTTPException, status
+from fastapi import FastAPI, APIRouter, Query, Depends, HTTPException, status, Request, Response
 from fastapi.security import APIKeyHeader
 
 load_dotenv()
+limiter = Limiter(
+    key_func=get_remote_address,
+    headers_enabled=True
+)
 
 API_KEY = os.getenv("API_KEY")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
@@ -37,6 +45,11 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None
 )
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
 
 
 @app.get("/")
@@ -49,7 +62,11 @@ def home():
     "/items",
     response_model=ItemsResponse
 )
+@limiter.limit("5/minute")
+
 def get_items(
+    request: Request,
+    response: Response,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=2, ge=1, le=100)
 ):
@@ -69,6 +86,7 @@ def get_items(
     "/items",
     response_model=Item
 )
-def create_item(item: Item):
+@limiter.limit("5/minute")
+def create_item(request: Request, item: Item):
     return item
 app.include_router(protected_router)
