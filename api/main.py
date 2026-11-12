@@ -1,4 +1,5 @@
 import os
+import logging
 
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
@@ -8,8 +9,12 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, APIRouter, Query, Depends, HTTPException, status, Request, Response
 from fastapi.security import APIKeyHeader
+from fastapi.responses import JSONResponse
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 limiter = Limiter(
     key_func=get_remote_address,
     headers_enabled=True
@@ -44,6 +49,22 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
     openapi_url=None
+)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception(
+        "Unexpected error on %s",
+        request.url.path
+    )
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error"
+        }
+    )
+app.add_exception_handler(
+    Exception,
+    global_exception_handler
 )
 app.state.limiter = limiter
 app.add_exception_handler(
