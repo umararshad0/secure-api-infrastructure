@@ -6,9 +6,10 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 
-client = TestClient(app)
+client = TestClient(app, base_url="http://localhost")
 rate_limit_client = TestClient(
     app,
+    base_url="http://localhost",
     client=("198.51.100.10", 12345)
 )
 

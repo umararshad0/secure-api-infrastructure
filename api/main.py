@@ -11,8 +11,20 @@ from pydantic import BaseModel, Field
 from fastapi import FastAPI, APIRouter, Query, Depends, HTTPException, status, Request, Response
 from fastapi.security import APIKeyHeader
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 load_dotenv()
+FORCE_HTTPS = os.getenv("FORCE_HTTPS", "false").lower() == "true"
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1"
+]
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -43,7 +55,61 @@ class ItemsResponse(BaseModel):
 protected_router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
+class RequestSizeLimitMiddleware:
+    def __init__(self, app, max_body_size=1048576):
+        self.app = app
+        self.max_body_size = max_body_size
 
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        body = bytearray()
+
+        while True:
+            message = await receive()
+
+            if message["type"] == "http.disconnect":
+                return
+
+            if message["type"] == "http.request":
+                body.extend(message.get("body", b""))
+
+                if len(body) > self.max_body_size:
+                    response = JSONResponse(
+                        status_code=413,
+                        content={"detail": "Request body too large"}
+                    )
+                    await response(scope, receive, send)
+                    return
+
+                if not message.get("more_body", False):
+                    break
+
+        body_bytes = bytes(body)
+        sent = False
+
+        async def replay_body():
+            nonlocal sent
+
+            if not sent:
+                sent = True
+                return {
+                    "type": "http.request",
+                    "body": body_bytes,
+                    "more_body": False
+                }
+
+            return {
+                "type": "http.request",
+                "body": b"",
+                "more_body": False
+            }
+
+        await self.app(scope, replay_body, send)
+
+       
 app = FastAPI(
     title="Secure API Infrastructure",
     description="A secure REST API built with FastAPI",
@@ -52,6 +118,24 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None
 )
+app.add_middleware(
+    RequestSizeLimitMiddleware,
+    max_body_size=1048576
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["X-API-Key", "Content-Type"]
+)
+if FORCE_HTTPS:
+    app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=ALLOWED_HOSTS
+)
+
 async def global_exception_handler(request: Request, exc: Exception):
     logger.exception(
         "Unexpected error on %s",
@@ -64,11 +148,20 @@ async def global_exception_handler(request: Request, exc: Exception):
             "detail": "Internal server error"
         }
     )
+
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+
     start_time = time.perf_counter()
 
     response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
     duration = (time.perf_counter() - start_time) * 1000
 
@@ -85,10 +178,12 @@ async def log_requests(request: Request, call_next):
 
     return response
 
+
 app.add_exception_handler(
     Exception,
     global_exception_handler
 )
+
 app.state.limiter = limiter
 app.add_exception_handler(
     RateLimitExceeded,
