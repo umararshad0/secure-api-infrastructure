@@ -23,8 +23,12 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000"
 ]
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1"
+    host.strip()
+    for host in os.getenv(
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1"
+    ).split(",")
+    if host.strip()
 ]
 logging.basicConfig(level=logging.INFO)
 
