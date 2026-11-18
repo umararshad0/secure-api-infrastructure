@@ -39,3 +39,13 @@ The self-signed certificate is intended for local development and testing inside
 The `-k` option in curl disables certificate verification. Production deployments should use a trusted certificate authority, such as Let's Encrypt.
 
 Never commit private SSL keys or API secrets to GitHub.
+
+
+## Automated Deployment
+
+The project includes a deployment script that automates the deployment process on the Ubuntu server.
+
+Run:
+
+```bash
+./deployment/deploy.sh
