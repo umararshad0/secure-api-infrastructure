@@ -18,7 +18,7 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 echo "Running tests..."
-pytest -v
+python -m pytest -v
 
 echo "Restarting API service..."
 sudo systemctl restart "$SERVICE_NAME"
