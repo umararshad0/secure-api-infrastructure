@@ -109,6 +109,31 @@ The lab is in Europe (Stockholm), `eu-north-1`:
 
 See `aws/networking-notes.md`, `aws/security-groups.md`, and `aws/architecture-diagram.md`. Port 443 is allowed by the AWS security group, but TLS was not configured on the AWS lab instance.
 
+### AWS lab screenshots
+
+<table>
+  <tr>
+    <td><strong>VPC configuration</strong><br><img src="aws/screenshots/vpc-configuration.png" width="420" alt="AWS VPC configuration"></td>
+    <td><strong>Subnet configuration</strong><br><img src="aws/screenshots/subnets-configuration.png" width="420" alt="AWS subnet configuration"></td>
+  </tr>
+  <tr>
+    <td><strong>Internet Gateway</strong><br><img src="aws/screenshots/internet-gateway.png" width="420" alt="AWS Internet Gateway"></td>
+    <td><strong>Public route table</strong><br><img src="aws/screenshots/public-route-table.png" width="420" alt="AWS public route table"></td>
+  </tr>
+  <tr>
+    <td><strong>Private route table</strong><br><img src="aws/screenshots/private-route-table.png" width="420" alt="AWS private route table"></td>
+    <td><strong>Security group inbound rules</strong><br><img src="aws/screenshots/security-group-inbound-rules.png" width="420" alt="AWS security group inbound rules"></td>
+  </tr>
+  <tr>
+    <td><strong>Security group outbound rules</strong><br><img src="aws/screenshots/security-group-outbound-rules.png" width="420" alt="AWS security group outbound rules"></td>
+    <td><strong>EC2 EBS storage</strong><br><img src="aws/screenshots/ec2-ebs-storage.png" width="420" alt="AWS EC2 EBS storage"></td>
+  </tr>
+  <tr>
+    <td><strong>EC2 instance stopped</strong><br><img src="aws/screenshots/ec2-instance-stopped.png" width="420" alt="AWS EC2 instance stopped"></td>
+    <td></td>
+  </tr>
+</table>
+
 ## Security notes
 
 - The Ubuntu VM's self-signed certificate is for local testing, not public production use. `curl -k` disables certificate verification.
