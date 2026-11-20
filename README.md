@@ -1,15 +1,15 @@
 # Secure API Infrastructure
 
-A hands-on DevOps project covering a protected FastAPI service, Ubuntu deployment behind Nginx, backup automation, and a separate AWS VPC networking lab. Domain and Cloudflare setup are planned but not configured yet.
+A hands-on DevOps project covering a protected FastAPI service, Ubuntu deployment behind Nginx, backup automation, Cloudflare tunnel testing, and a separate AWS VPC networking lab.
 
 ## Current status
 
 - The API runs on an Ubuntu virtual machine as a systemd service behind Nginx.
 - HTTPS on the Ubuntu lab uses a self-signed certificate for local-network testing.
 - The test suite contains nine API tests; all nine passed in the latest recorded run.
-- A daily backup is scheduled with cron. The script has passed a manual run; the next scheduled run still needs verification. Backups contain project files, including `.env`, and must remain access-restricted.
+- A daily backup is scheduled with cron and explicitly runs under Bash. Cron execution has been verified, and timestamped archives are owner-readable only. Backups contain project files, including `.env`, and must remain access-restricted.
 - The AWS networking lab is separate from the Ubuntu API deployment. Its EC2 instance is stopped.
-- A temporary Cloudflare Quick Tunnel was tested successfully; custom-domain DNS and stable Cloudflare configuration remain future work.
+- A temporary Cloudflare Quick Tunnel was tested successfully for external connectivity checks.
 
 ## Architecture
 
@@ -114,7 +114,7 @@ See `aws/networking-notes.md`, `aws/security-groups.md`, and `aws/architecture-d
 - The Ubuntu VM's self-signed certificate is for local testing, not public production use. `curl -k` disables certificate verification.
 - The AWS lab and Ubuntu API server are separate environments.
 - Never commit `.env`, API secrets, private keys, certificates, or backup archives.
-- Before public deployment, configure a domain, trusted TLS certificate, Cloudflare DNS/proxy, and production CORS and host allow lists.
+- The Ubuntu lab uses a self-signed certificate; use a trusted certificate and production CORS and host allow lists before exposing it as a production service.
 
 The domainless Quick Tunnel test and its limits are documented in [`cloudflare/quick-tunnel-testing.md`](cloudflare/quick-tunnel-testing.md). It is for temporary development only and does not configure a Cloudflare DNS zone.
 
@@ -129,9 +129,7 @@ tests/                API tests
 requirements.txt      Python dependencies
 ```
 
-## Next steps
+## Deployment notes
 
-- Register a domain, then configure DNS, Cloudflare proxy, and trusted HTTPS.
-- Document the actual Cloudflare settings under `cloudflare/`.
-- Run final domain-based security and connectivity checks.
-- Complete the final security and GitHub repository review.
+- SSH hardening steps for the Ubuntu lab VM are documented in [`deployment/ssh-hardening.md`](deployment/ssh-hardening.md). Disable password login only after verifying a fresh key-based SSH session.
+- The temporary Cloudflare Quick Tunnel behavior is documented in [`cloudflare/quick-tunnel-testing.md`](cloudflare/quick-tunnel-testing.md).

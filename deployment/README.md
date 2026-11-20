@@ -31,11 +31,18 @@ virtual environment, and service are already configured.
 - Check Nginx config: `sudo nginx -t`
 - Reload Nginx: `sudo systemctl reload nginx`
 
+## SSH hardening
+
+Follow [`ssh-hardening.md`](ssh-hardening.md) to install an SSH public key,
+verify a separate key-based login, and only then disable password and root SSH
+login. Keep an existing session or VM console available until the new login is
+verified.
+
 ## Backup
 
 Run `deployment/backup.sh` to create and verify a backup under
-`/home/umar/backups/`. The daily cron schedule and its log path are in
-`crontab -l`.
+`/home/umar/backups/`. The daily cron schedule uses `/bin/bash` and logs to
+`/home/umar/backups/backup.log`; inspect it with `crontab -l`.
 
 ## Rollback
 
