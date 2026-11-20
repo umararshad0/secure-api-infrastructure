@@ -9,7 +9,7 @@ A hands-on DevOps project covering a protected FastAPI service, Ubuntu deploymen
 - The test suite contains nine API tests; all nine passed in the latest recorded run.
 - A daily backup is scheduled with cron. The script has passed a manual run; the next scheduled run still needs verification. Backups contain project files, including `.env`, and must remain access-restricted.
 - The AWS networking lab is separate from the Ubuntu API deployment. Its EC2 instance is stopped.
-- Cloudflare, custom-domain DNS, and trusted public TLS are future work.
+- A temporary Cloudflare Quick Tunnel was tested successfully; custom-domain DNS and stable Cloudflare configuration remain future work.
 
 ## Architecture
 
@@ -116,6 +116,8 @@ See `aws/networking-notes.md`, `aws/security-groups.md`, and `aws/architecture-d
 - Never commit `.env`, API secrets, private keys, certificates, or backup archives.
 - Before public deployment, configure a domain, trusted TLS certificate, Cloudflare DNS/proxy, and production CORS and host allow lists.
 
+The domainless Quick Tunnel test and its limits are documented in [`cloudflare/quick-tunnel-testing.md`](cloudflare/quick-tunnel-testing.md). It is for temporary development only and does not configure a Cloudflare DNS zone.
+
 ## Repository layout
 
 ```text
@@ -129,7 +131,7 @@ requirements.txt      Python dependencies
 
 ## Next steps
 
-- Configure domain DNS, Cloudflare proxy, and trusted HTTPS.
+- Register a domain, then configure DNS, Cloudflare proxy, and trusted HTTPS.
 - Document the actual Cloudflare settings under `cloudflare/`.
 - Run final domain-based security and connectivity checks.
 - Complete the final security and GitHub repository review.
