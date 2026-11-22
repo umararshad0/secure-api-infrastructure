@@ -35,7 +35,7 @@ Protected routes use the `X-API-Key` header. The sample data is in memory and is
 Security and reliability features include:
 
 - Pydantic request and response validation.
-- Rate limit of five requests per minute per client IP on item routes.
+- Rate limit of five requests per minute per client IP on item routes. The limiter is process-local; use a shared backend such as Redis when running multiple workers.
 - Request-body limit of 1 MiB.
 - Configurable trusted hosts, generic internal error responses, and request logging.
 - CORS for local development origins `http://localhost:3000` and `http://127.0.0.1:3000`.
@@ -51,7 +51,7 @@ git clone https://github.com/umararshad0/secure-api-infrastructure.git
 cd secure-api-infrastructure
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env
 ```
 
@@ -151,7 +151,8 @@ aws/                 VPC notes, architecture, and screenshots
 deployment/           Setup, deploy, backup scripts, and deployment guide
 tests/                API tests
 .env.example          Example environment configuration
-requirements.txt      Python dependencies
+requirements.txt      Runtime dependencies
+requirements-dev.txt  Runtime and test dependencies
 ```
 
 ## Deployment notes
