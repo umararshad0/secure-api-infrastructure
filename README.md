@@ -77,7 +77,16 @@ The CORS origins are currently defined in `api/main.py`; update them deliberatel
 python -m pytest -v
 ```
 
-The nine tests cover the home route, API-key authentication, pagination, validation, rate limiting, and item creation. To check dependencies for known vulnerabilities, run `pip-audit -r requirements.txt`.
+The nine tests cover the home route, API-key authentication, pagination, validation, rate limiting, and item creation. To check dependencies for known vulnerabilities, install and run `pip-audit`:
+
+```bash
+python -m pip install pip-audit
+pip-audit -r requirements.txt
+```
+
+## Continuous integration
+
+GitHub Actions runs `python -m pytest -q` with Python 3.12 on pushes to `main` and pull requests targeting `main`. The workflow uses a CI-only API key and does not need AWS credentials.
 
 ## Ubuntu deployment
 
