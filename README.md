@@ -1,17 +1,70 @@
 # Secure API Infrastructure
 
-A hands-on DevOps project covering a protected FastAPI service, Ubuntu deployment behind Nginx, backup automation, Cloudflare tunnel testing, and a separate AWS VPC networking lab.
+A FastAPI security and deployment lab with API-key protection, rate limiting, Ubuntu operations, and separate AWS networking notes.
 
-## Current status
+## Problem & Solution
 
-- The API runs on an Ubuntu virtual machine as a systemd service behind Nginx.
-- HTTPS on the Ubuntu lab uses a self-signed certificate for local-network testing.
-- The test suite contains nine API tests; all nine passed in the latest recorded run.
-- A daily backup is scheduled with cron and explicitly runs under Bash. Cron execution has been verified, and timestamped archives are owner-readable only. Backups contain project files, including `.env`, and must remain access-restricted.
-- The AWS networking lab is separate from the Ubuntu API deployment. Its EC2 instance is stopped.
-- A temporary Cloudflare Quick Tunnel was tested successfully for external connectivity checks.
+- **Problem:** A small API still needs controls for authentication, request validation, abusive traffic, and operational recovery.
+- **Approach:** The project combines protected FastAPI routes with request limits, host controls, deployment scripts, and backup guidance.
+- **Outcome:** It documents a practical path from local development to a secured Ubuntu lab deployment.
 
-## Architecture
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/vpc-configuration.png" alt="AWS VPC configuration" width="420">
+      <br><sub>AWS VPC configuration</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/subnets-configuration.png" alt="AWS subnet configuration" width="420">
+      <br><sub>AWS subnet configuration</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/internet-gateway.png" alt="AWS Internet Gateway" width="420">
+      <br><sub>AWS Internet Gateway</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/public-route-table.png" alt="AWS public route table" width="420">
+      <br><sub>AWS public route table</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/private-route-table.png" alt="AWS private route table" width="420">
+      <br><sub>AWS private route table</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/security-group-inbound-rules.png" alt="AWS security group inbound rules" width="420">
+      <br><sub>AWS security group inbound rules</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/security-group-outbound-rules.png" alt="AWS security group outbound rules" width="420">
+      <br><sub>AWS security group outbound rules</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/ec2-ebs-storage.png" alt="AWS EC2 EBS storage" width="420">
+      <br><sub>AWS EC2 EBS storage</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="aws/screenshots/ec2-instance-stopped.png" alt="AWS EC2 instance stopped" width="420">
+      <br><sub>AWS EC2 instance stopped</sub>
+    </td>
+    <td></td>
+  </tr>
+</table>
+
+## Architecture Diagram
+
+Architecture details are documented below.
+
+### Architecture Notes
 
 ```mermaid
 flowchart LR
@@ -22,7 +75,21 @@ flowchart LR
 
 The AWS directory also documents a conceptual three-tier production design with a public load balancer, private application tier, and private database tier. Those tiers have not been created in AWS.
 
-## API
+## Project Details
+
+### Current status
+
+
+- The API runs on an Ubuntu virtual machine as a systemd service behind Nginx.
+- HTTPS on the Ubuntu lab uses a self-signed certificate for local-network testing.
+- The test suite contains nine API tests; all nine passed in the latest recorded run.
+- A daily backup is scheduled with cron and explicitly runs under Bash. Cron execution has been verified, and timestamped archives are owner-readable only. Backups contain project files, including `.env`, and must remain access-restricted.
+- The AWS networking lab is separate from the Ubuntu API deployment. Its EC2 instance is stopped.
+- A temporary Cloudflare Quick Tunnel was tested successfully for external connectivity checks.
+
+
+### API
+
 
 | Method | Path | Access | Description |
 |---|---|---|---|
@@ -42,7 +109,9 @@ Security and reliability features include:
 - API docs and OpenAPI endpoints disabled.
 - Response headers for content type, framing, referrer policy, content security policy, and permissions policy.
 
-## Run locally
+
+### Run locally
+
 
 Requirements: Python 3 and Git. The Ubuntu lab was tested with Python 3.12.
 
@@ -71,7 +140,9 @@ uvicorn api.main:app --reload
 
 The CORS origins are currently defined in `api/main.py`; update them deliberately when adding a frontend origin.
 
-## Tests
+
+### Tests
+
 
 ```bash
 python -m pytest -v
@@ -84,11 +155,15 @@ python -m pip install pip-audit
 pip-audit -r requirements.txt
 ```
 
-## Continuous integration
+
+### Continuous integration
+
 
 GitHub Actions runs `python -m pytest -q` with Python 3.12 on pushes to `main` and pull requests targeting `main`. The workflow uses a CI-only API key and does not need AWS credentials.
 
-## Ubuntu deployment
+
+### Ubuntu deployment
+
 
 The scripts target the existing Ubuntu lab server. `deployment/setup-server.sh` installs prerequisite packages but does not configure the firewall, secrets, Nginx, or systemd.
 
@@ -106,7 +181,9 @@ sudo nginx -t
 
 Backups include `.env`. Restrict access to backup files and encrypt them before placing copies in remote storage.
 
-## AWS networking lab
+
+### AWS networking lab
+
 
 The lab is in Europe (Stockholm), `eu-north-1`:
 
@@ -118,32 +195,9 @@ The lab is in Europe (Stockholm), `eu-north-1`:
 
 See `aws/networking-notes.md`, `aws/security-groups.md`, and `aws/architecture-diagram.md`. Port 443 is allowed by the AWS security group, but TLS was not configured on the AWS lab instance.
 
-### AWS lab screenshots
 
-<table>
-  <tr>
-    <td><strong>VPC configuration</strong><br><img src="aws/screenshots/vpc-configuration.png" width="420" alt="AWS VPC configuration"></td>
-    <td><strong>Subnet configuration</strong><br><img src="aws/screenshots/subnets-configuration.png" width="420" alt="AWS subnet configuration"></td>
-  </tr>
-  <tr>
-    <td><strong>Internet Gateway</strong><br><img src="aws/screenshots/internet-gateway.png" width="420" alt="AWS Internet Gateway"></td>
-    <td><strong>Public route table</strong><br><img src="aws/screenshots/public-route-table.png" width="420" alt="AWS public route table"></td>
-  </tr>
-  <tr>
-    <td><strong>Private route table</strong><br><img src="aws/screenshots/private-route-table.png" width="420" alt="AWS private route table"></td>
-    <td><strong>Security group inbound rules</strong><br><img src="aws/screenshots/security-group-inbound-rules.png" width="420" alt="AWS security group inbound rules"></td>
-  </tr>
-  <tr>
-    <td><strong>Security group outbound rules</strong><br><img src="aws/screenshots/security-group-outbound-rules.png" width="420" alt="AWS security group outbound rules"></td>
-    <td><strong>EC2 EBS storage</strong><br><img src="aws/screenshots/ec2-ebs-storage.png" width="420" alt="AWS EC2 EBS storage"></td>
-  </tr>
-  <tr>
-    <td><strong>EC2 instance stopped</strong><br><img src="aws/screenshots/ec2-instance-stopped.png" width="420" alt="AWS EC2 instance stopped"></td>
-    <td></td>
-  </tr>
-</table>
+### Security notes
 
-## Security notes
 
 - The Ubuntu VM's self-signed certificate is for local testing, not public production use. `curl -k` disables certificate verification.
 - The AWS lab and Ubuntu API server are separate environments.
@@ -152,7 +206,9 @@ See `aws/networking-notes.md`, `aws/security-groups.md`, and `aws/architecture-d
 
 The domainless Quick Tunnel test and its limits are documented in [`cloudflare/quick-tunnel-testing.md`](cloudflare/quick-tunnel-testing.md). It is for temporary development only and does not configure a Cloudflare DNS zone.
 
-## Repository layout
+
+### Repository layout
+
 
 ```text
 api/                 FastAPI application
@@ -164,7 +220,13 @@ requirements.txt      Runtime dependencies
 requirements-dev.txt  Runtime and test dependencies
 ```
 
-## Deployment notes
+
+### Deployment notes
+
 
 - SSH hardening steps for the Ubuntu lab VM are documented in [`deployment/ssh-hardening.md`](deployment/ssh-hardening.md). Disable password login only after verifying a fresh key-based SSH session.
 - The temporary Cloudflare Quick Tunnel behavior is documented in [`cloudflare/quick-tunnel-testing.md`](cloudflare/quick-tunnel-testing.md).
+
+## Author
+
+**Umar Arshad** · [GitHub](https://github.com/umararshad0)
