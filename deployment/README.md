@@ -20,8 +20,13 @@ systemd configuration.
 6. Run `deployment/deploy.sh`.
 
 `deploy.sh` pulls `main`, installs dependencies, runs pytest, restarts the
-service, and checks that systemd reports it active. It assumes the repository,
-virtual environment, and service are already configured.
+service, checks that systemd reports it active, and waits for an HTTP 2xx
+response from the API. The health check defaults to
+`http://127.0.0.1:8000/`; set `HEALTHCHECK_URL` when invoking the script if the
+service listens on a different URL or requires HTTPS. Use a URL that returns
+HTTP 2xx without interactive authentication. It assumes the repository, virtual
+environment, and service are already configured. `setup-server.sh` installs
+`curl`, which the deployment health check uses.
 
 ## Service management
 
