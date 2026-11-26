@@ -130,7 +130,15 @@ Edit `.env` and replace the example `API_KEY` with a strong secret. Generate one
 python -c 'import secrets; print(secrets.token_urlsafe(48))'
 ```
 
-Set `ALLOWED_HOSTS` to the hostnames used to access the service. Set `CORS_ALLOWED_ORIGINS` to a comma-separated list of exact frontend origins; it defaults to the two localhost development origins. `FORCE_HTTPS` defaults to `false`; enable it only when HTTPS and proxy handling are configured.
+Set `ALLOWED_HOSTS` to the hostnames used to access the service.
+
+Set `CORS_ALLOWED_ORIGINS` to a comma-separated list of exact frontend origins, without trailing slashes.
+
+- If the variable is unset, localhost development origins are used by default.
+- If the variable is explicitly empty, no cross-origin origins are allowed.
+- For production, configure only trusted frontend origins.
+
+`FORCE_HTTPS` defaults to `false`; enable it only when HTTPS and proxy handling are configured.
 
 Start the development server:
 
