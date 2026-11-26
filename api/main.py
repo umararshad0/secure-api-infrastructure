@@ -18,10 +18,20 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 load_dotenv()
 FORCE_HTTPS = os.getenv("FORCE_HTTPS", "false").lower() == "true"
-ALLOWED_ORIGINS = [
+DEFAULT_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
+
+
+def parse_allowed_origins(origins: str | None) -> list[str]:
+    if origins is None:
+        return DEFAULT_ALLOWED_ORIGINS.copy()
+
+    return [origin.strip() for origin in origins.split(",") if origin.strip()]
+
+
+ALLOWED_ORIGINS = parse_allowed_origins(os.getenv("CORS_ALLOWED_ORIGINS"))
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv(

@@ -146,9 +146,6 @@ Start the development server:
 uvicorn api.main:app --reload
 ```
 
-The CORS origins are currently defined in `api/main.py`; update them deliberately when adding a frontend origin.
-
-
 ### Tests
 
 
