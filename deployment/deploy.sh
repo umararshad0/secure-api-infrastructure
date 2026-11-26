@@ -13,6 +13,7 @@ echo "Pulling latest code..."
 git pull origin main
 
 echo "Activating virtual environment..."
+# shellcheck disable=SC1091
 source .venv/bin/activate
 
 echo "Installing dependencies..."
