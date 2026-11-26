@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from fastapi.testclient import TestClient
 
-from api.main import app, parse_allowed_origins
+from api.main import app, parse_allowed_origins, ALLOWED_ORIGINS
 
 client = TestClient(app, base_url="http://localhost")
 rate_limit_client = TestClient(
@@ -139,3 +139,47 @@ def test_parse_allowed_origins_trims_and_ignores_empty_entries():
         "https://app.example.com",
         "https://admin.example.com"
     ]
+def test_cors_allows_configured_origin():
+    assert ALLOWED_ORIGINS
+
+    origin = ALLOWED_ORIGINS[0]
+
+    response = client.get(
+        "/",
+        headers={"Origin": origin}
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin
+
+
+def test_cors_rejects_untrusted_origin():
+    origin = "https://untrusted.example.com"
+
+    assert origin not in ALLOWED_ORIGINS
+
+    response = client.get(
+        "/",
+        headers={"Origin": origin}
+    )
+
+    assert response.status_code == 200
+    assert "access-control-allow-origin" not in response.headers
+
+
+def test_cors_preflight_request():
+    origin = ALLOWED_ORIGINS[0]
+
+    response = client.options(
+        "/items",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "X-API-Key"
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin
+    assert "GET" in response.headers["access-control-allow-methods"]
+    assert "X-API-Key" in response.headers["access-control-allow-headers"]
