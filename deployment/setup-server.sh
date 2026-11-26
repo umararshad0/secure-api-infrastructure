@@ -13,7 +13,7 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y git nginx python3 python3-venv python3-pip fail2ban ufw
+apt-get install -y curl git nginx python3 python3-venv python3-pip fail2ban ufw
 
 echo "Prerequisite packages installed."
 echo "Review UFW rules and SSH access before enabling or changing the firewall."
