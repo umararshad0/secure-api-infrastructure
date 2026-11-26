@@ -130,16 +130,13 @@ Edit `.env` and replace the example `API_KEY` with a strong secret. Generate one
 python -c 'import secrets; print(secrets.token_urlsafe(48))'
 ```
 
-Set `ALLOWED_HOSTS` to the hostnames used to access the service. `FORCE_HTTPS` defaults to `false`; enable it only when HTTPS and proxy handling are configured.
+Set `ALLOWED_HOSTS` to the hostnames used to access the service. Set `CORS_ALLOWED_ORIGINS` to a comma-separated list of exact frontend origins; it defaults to the two localhost development origins. `FORCE_HTTPS` defaults to `false`; enable it only when HTTPS and proxy handling are configured.
 
 Start the development server:
 
 ```bash
 uvicorn api.main:app --reload
 ```
-
-The CORS origins are currently defined in `api/main.py`; update them deliberately when adding a frontend origin.
-
 
 ### Tests
 

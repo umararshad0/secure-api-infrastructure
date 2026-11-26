@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import app, parse_allowed_origins
 
 client = TestClient(app, base_url="http://localhost")
 rate_limit_client = TestClient(
@@ -122,3 +122,20 @@ def test_create_item():
         "id": 10,
         "name": "Cloud Server"
     }
+
+
+def test_parse_allowed_origins_uses_local_defaults_when_unset():
+    assert parse_allowed_origins("") == []
+    assert parse_allowed_origins(None) == [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ]
+
+
+def test_parse_allowed_origins_trims_and_ignores_empty_entries():
+    assert parse_allowed_origins(
+        " https://app.example.com, ,https://admin.example.com "
+    ) == [
+        "https://app.example.com",
+        "https://admin.example.com"
+    ]
